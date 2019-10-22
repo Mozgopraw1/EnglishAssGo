@@ -5,14 +5,15 @@ import (
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"strconv"
+	"time"
 )
 
 type dbEng struct{
 	id int
 	englishWord string
 	russianWord string
-	timeInit int
-	timeCheck int
+	timeInit time.Time
+	timeCheck time.Time
 	examine int
 	day int
 	word string
@@ -76,6 +77,25 @@ func addWord(str dbEng) {
 	str.word = str.englishWord
 	scanWord(&str)
 	str.word = str.russianWord
+
+	//запись времени в переменные
+	str.timeInit = time.Now()
+	str.timeCheck = time.Now()
+
+	//оставщиеся перменные
+	str.examine = 1
+
+	// day = 1 - Новое слово
+	// day = 2 - 15 min
+	// day = 3 - 2 hours
+	// day = 4 - 1 day
+	// day = 5 - 3 day
+	// day = 6 - 7 day
+	// day = 7 - 21 day
+	// day = 8 - 50 day
+	// day = 9 - 150 day
+	// day = 10 - 365 day
+	str.day = 1
 }
 
 // scanWord - чтение слова из консоли
@@ -85,3 +105,11 @@ func scanWord(str *dbEng) {
 		fmt.Println(err)
 	}
 }
+
+/*
+func addWordDB(str dbEng) {
+	result, err := db.Exec(`insert into english (id, english_word, russian_word, time_int, time_check, examine, day) values()`)
+if err != nil(
+	panic(err))
+}
+*/

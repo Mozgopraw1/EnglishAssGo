@@ -32,11 +32,11 @@
     </column>
     <column id="12" parent="6" name="time_init">
       <Position>4</Position>
-      <DataType>int|0s</DataType>
+      <DataType>time|0s</DataType>
     </column>
     <column id="13" parent="6" name="time_check">
       <Position>5</Position>
-      <DataType>int|0s</DataType>
+      <DataType>time|0s</DataType>
     </column>
     <column id="14" parent="6" name="examine">
       <Position>6</Position>
