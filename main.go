@@ -23,10 +23,10 @@ var x int
 
 func main() {
 	str := new(dbEng)
-	openClose() // sqlite
 	welcomeP() // приветствие и инструкция
 	scanX(&x) // выбор варианта продолжения программы
 	variant(x, *str) // запуск одного из вариантов
+	addWordDB(str) // добавление слова в таблица
 }
 
 //openClose - sqlite
@@ -75,14 +75,15 @@ func addWord(str dbEng) {
 	fmt.Println("Слово, Слова")
 	scanWord(&str)
 	str.word = str.englishWord
+	fmt.Println("str.englishWord: = ", str.englishWord)
 	scanWord(&str)
 	str.word = str.russianWord
 
-	//запись времени в переменные
+	// запись времени в переменные
 	str.timeInit = time.Now()
 	str.timeCheck = time.Now()
 
-	//оставщиеся перменные
+	// количество повторений(inc)
 	str.examine = 1
 
 	// day = 1 - Новое слово
@@ -106,10 +107,23 @@ func scanWord(str *dbEng) {
 	}
 }
 
-/*
-func addWordDB(str dbEng) {
-	result, err := db.Exec(`insert into english (id, english_word, russian_word, time_int, time_check, examine, day) values()`)
-if err != nil(
-	panic(err))
+
+func addWordDB(str *dbEng) {
+	db, err := sql.Open("sqlite3", "english.sqlite")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+	result, err := db.Exec(`
+		insert into english (english_word, russian_word, time_init,
+		time_check, examine, day) 
+		values($1, $2, $3, $4, $5, $6)`,
+		str.englishWord, str.russianWord, str.timeInit, str.timeCheck,
+		str.examine, str.day)
+	if err != nil{
+		panic(err)}
+	fmt.Println(str.englishWord, str.russianWord, str.timeInit, str.timeCheck,
+		str.examine, str.day)
+	fmt.Println(result.LastInsertId())
+	fmt.Println(result.RowsAffected())
 }
-*/
