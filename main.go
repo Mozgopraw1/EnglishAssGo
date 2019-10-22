@@ -127,3 +127,4 @@ func addWordDB(str *dbEng) {
 	fmt.Println(result.LastInsertId())
 	fmt.Println(result.RowsAffected())
 }
+// test
