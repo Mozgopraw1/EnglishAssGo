@@ -4,28 +4,28 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
-	"os"
 	"strconv"
 )
 
-type english struct{
+type dbEng struct{
 	id int
-	english_word string
-	russian_word string
-	time_init int
-	time_check int
+	englishWord string
+	russianWord string
+	timeInit int
+	timeCheck int
 	examine int
 	day int
+	word string
 }
 
 var x int
-var word string
 
 func main() {
+	str := new(dbEng)
 	openClose() // sqlite
 	welcomeP() // приветствие и инструкция
-	scanX(x) // выбор варианта продолжения программы
-	variant(x) // запуск одного из вариантов
+	scanX(&x) // выбор варианта продолжения программы
+	variant(x, *str) // запуск одного из вариантов
 }
 
 //openClose - sqlite
@@ -45,24 +45,22 @@ func welcomeP() {
 }
 
 //scanX - выбранные вариант продолжения программы.
-func scanX(x int) error{
+func scanX(x *int) {
 	var a string
-	_, err := fmt.Scan(a)
-	x, err = strconv.Atoi(a)
+	_, err := fmt.Scan(&a)
+	*x, err = strconv.Atoi(a)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(err, x)
 	if err != nil {
-		return err
+		fmt.Println(err)
 	}
-	return err
 }
 
 // variant - запуск одного из вариантов
-func variant(x int){
+func variant(x int, str dbEng){
 	if x == 1 {
-		addWord()
+		addWord(str)
 	}
 	if x == 2 {
 
@@ -70,19 +68,20 @@ func variant(x int){
 }
 
 // addWord - добавление слова
-func addWord(){
+func addWord(str dbEng) {
 	fmt.Println("Введите слова по примеру:")
 	fmt.Println("Word, Words")
 	fmt.Println("Слово, Слова")
-	scanWord(word)
-	fmt.Printf(word)
-	scanWord(word)
+	scanWord(&str)
+	str.word = str.englishWord
+	scanWord(&str)
+	str.word = str.russianWord
 }
 
 // scanWord - чтение слова из консоли
-func scanWord(word string) {
-	_, err := fmt.Fscanln(os.Stdin, word)
+func scanWord(str *dbEng) {
+	_, err := fmt.Scan(&str.word)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 }
