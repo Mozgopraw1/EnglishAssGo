@@ -260,6 +260,9 @@ func dayTime(str *dbEng) {
 	if str.day == 9 {
 		str.dayTime = 31536000 // 365d
 	}
+	if str.day > 10 {
+		str.dayTime = 157680000
+	}
 }
 
 // TimeCheckDay - вывод слова на проверку
@@ -283,6 +286,7 @@ func examineWord(str *dbEng){
 	fmt.Println("Если ответы не совпадают, введите - 2")
 	scanY(str)
 	examineEnd(str)
+	dateIn(str)
 }
 
 //examineEnd - формирования данных для записи в базу данных
@@ -318,15 +322,25 @@ func examineEnd(str *dbEng){
 }
 
 //examineFail - обработка количества ошибок.
-func examineFail(str *dbEng){
-	if str.examine > 2 {	// больше 3 не может быть
-		if str.day > 1 {	// чтоб day не смог стать меньше 1
-		str.day--			// откат к прошлом дню
-		str.examine = 0		// возврат ошибок к первоначальному значению.
+func examineFail(str *dbEng) {
+	if str.examine > 2 { // больше 3 не может быть
+		if str.day > 1 { // чтоб day не смог стать меньше 1
+			str.day--       // откат к прошлом дню
+			str.examine = 0 // возврат ошибок к первоначальному значению.
+		}
 	}
 }
 
 //dateIn - ввод данных после экзамена
 func dateIn(str *dbEng){
+	db, err := sql.Open("sqlite3", "english.sqlite")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
 
+	// обновление строки по id
+	result, err := db.Exec("update english set day = $1, mistake = $3 where id = $2", 12, str.id, 5)
+	if err != nil { panic (err)}
+	fmt.Println(result.RowsAffected())
 }
