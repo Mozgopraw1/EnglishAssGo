@@ -112,7 +112,7 @@ func addWord(str *dbEng) {
 	str.timeCheck = timeNow.Format("2006-01-02 15:04:05")
 
 	// количество повторений(inc)
-	str.ready = 1
+	str.mistake = 1
 
 	// временной промежуток
 	// day = 1 - Новое слово
@@ -127,8 +127,8 @@ func addWord(str *dbEng) {
 	// day = 10 - 365 day
 	str.day = 1
 
-	// количество повторных ошибок > 3 = откат на прошлый временной промежуток (day)
-	str.mistake = 1
+	// количество повторных ошибок > 2 = откат на прошлый временной промежуток (day)
+	str.examine = 0
 
 }
 
@@ -285,20 +285,6 @@ func examineWord(str *dbEng){
 	examineEnd(str)
 }
 
-/*
-	id int
-	englishWord string
-	russianWord string
-	timeInit string
-	timeCheck string
-	examine int
-	day int
-	word string
-	mistake int
-	dayTime float64
-	dayTime1 float64
-	y int
-*/
 //examineEnd - формирования данных для записи в базу данных
 func examineEnd(str *dbEng){
 	if str.y == 1 { // y==1 ответы совпали
@@ -324,9 +310,19 @@ func examineEnd(str *dbEng){
 
 		//examine - ошибка допущена +1
 		str.examine++
+		examineFail(str)
 
 		//mistake - +1 после каждой проверки всегда
 		str.mistake++
+	}
+}
+
+//examineFail - обработка количества ошибок.
+func examineFail(str *dbEng){
+	if str.examine > 2 {	// больше 3 не может быть
+		if str.day > 1 {	// чтоб day не смог стать меньше 1
+		str.day--			// откат к прошлом дню
+		str.examine = 0		// возврат ошибок к первоначальному значению.
 	}
 }
 
