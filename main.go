@@ -15,13 +15,15 @@ type dbEng struct{
 	russianWord string
 	timeInit string
 	timeCheck string
-	examine int
+	examine int // количество ошибок подряд (не может быть больше 2)
 	day int
 	word string
-	mistake int
+	mistake int // количество ошибок (увеличивается всегда после теста)
 	dayTime float64
 	dayTime1 float64
 	y int
+	timeTemporal string // временная переменная для времени
+	ready int // переменная готовности
 }
 
 var x int
@@ -110,7 +112,7 @@ func addWord(str *dbEng) {
 	str.timeCheck = timeNow.Format("2006-01-02 15:04:05")
 
 	// количество повторений(inc)
-	str.examine = 1
+	str.ready = 1
 
 	// временной промежуток
 	// day = 1 - Новое слово
@@ -212,6 +214,13 @@ func checkTime(str *dbEng) {
 	timeCheckDay(str)
 }
 
+// formatDate - форматирования time.Now() к моему стандарту
+func formatTime(str *dbEng) {
+	timeNow := time.Now()
+	timeNow.String()
+	str.timeTemporal = timeNow.Format("2006-01-02 15:04:05")
+}
+
 // временной промежуток
 // day = 1 - 15 min
 // day = 2 - 2 hours
@@ -257,10 +266,10 @@ func dayTime(str *dbEng) {
 func timeCheckDay(str *dbEng){
 	a := str.dayTime1 - str.dayTime
 	if a > 0 {
-		str.examine = 2 // готово к проверку
+		str.ready = 2 // готово к проверку
 		examineWord(str)
 	} else {
-		str.examine = 1 // не готово к проверке
+		str.ready = 1 // не готово к проверке
 		fmt.Println("Слово не готово для проверки")
 	}
 }
@@ -273,6 +282,52 @@ func examineWord(str *dbEng){
 	fmt.Println("Если ответы совпадают, введите - 1")
 	fmt.Println("Если ответы не совпадают, введите - 2")
 	scanY(str)
+	examineEnd(str)
+}
+
+/*
+	id int
+	englishWord string
+	russianWord string
+	timeInit string
+	timeCheck string
+	examine int
+	day int
+	word string
+	mistake int
+	dayTime float64
+	dayTime1 float64
+	y int
+*/
+//examineEnd - формирования данных для записи в базу данных
+func examineEnd(str *dbEng){
+	if str.y == 1 { // y==1 ответы совпали
+
+		// timeCheck - присвоение даты прохождения теста
+		formatTime(str)
+		str.timeCheck = str.timeTemporal
+
+		//examine - ошибок нет
+		str.examine = 1
+
+		//day - +1 к дню
+		str.day++
+
+		//mistake - +1 после каждой проверки всегда
+		str.mistake++
+
+	} else { // y!=2 ответы не совпали
+
+		// timeCheck - присвоение даты прохождения теста
+		formatTime(str)
+		str.timeCheck = str.timeTemporal
+
+		//examine - ошибка допущена +1
+		str.examine++
+
+		//mistake - +1 после каждой проверки всегда
+		str.mistake++
+	}
 }
 
 //dateIn - ввод данных после экзамена
