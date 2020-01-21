@@ -10,40 +10,31 @@ import (
 )
 
 type dbEng struct{
-	id int
-	englishWord string
-	russianWord string
-	timeInit string
-	timeCheck string
+	id int // порядковый номер в таблице
+	englishWord string // английское слово
+	russianWord string // русское слово - перевод
+	timeInit string // дата создания записи
+	timeCheck string // последняя проверка слова
 	examine int // количество ошибок подряд (не может быть больше 2)
-	day int
-	word string
+	day int // =(1-10) - период проверки слова
+	word string // временное слово
 	mistake int // количество ошибок (увеличивается всегда после теста)
-	dayTime float64
-	dayTime1 float64
-	y int
+	dayTime float64 // временная переменная для периода
+	dayTime1 float64 // временная переменная для периода
+	y int // временная переменая
 	timeTemporal string // временная переменная для времени
 	ready int // переменная готовности
 }
 
-var x int
+var x int // надо снести, чтоб переписать на Y
 
 func main() {
 	for {
-		str := new(dbEng)
+		str := new(dbEng) // str - структура данных всей программы
 		welcomeP()      // приветствие и инструкция
 		scanX(&x)       // выбор варианта продолжения программы
 		variant(x, str) // запуск одного из вариантов
 	}
-}
-
-//openClose - sqlite
-func openClose() {
-	db, err := sql.Open("sqlite3", "english.sqlite")
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
 }
 
 //welcomeP - приветствие
@@ -54,6 +45,7 @@ func welcomeP() {
 	fmt.Println("3 - выход из программы")
 }
 
+// надо переписать эту функция с Y
 //scanX - выбранные вариант продолжения программы.
 func scanX(x *int) {
 	var a string
@@ -67,6 +59,7 @@ func scanX(x *int) {
 	}
 }
 
+// scanY - считывает цифру из консоли.
 func scanY(str *dbEng) {
 	var a string
 	_, err := fmt.Scan(&a)
@@ -82,26 +75,26 @@ func scanY(str *dbEng) {
 // variant - запуск одного из вариантов
 func variant(x int, str *dbEng){
 	if x == 1 {
-		checkWord(str)
+		checkWord(str) // проверка слова
 	}
 	if x == 2 {
-		addWord(str)
+		addWord(str) // формирование слова для таблицы
 		addWordDB(*str) // добавление слова в таблица
 	}
 	if x == 3 {
-		os.Exit(0)
+		os.Exit(0) // закрытие программы
 	}
 }
 
-// addWord - добавление слова
+// addWord - формирование слова для таблицы
 func addWord(str *dbEng) {
 	fmt.Println("Введите слова по примеру:")
 	fmt.Println("Word, Words")
 	fmt.Println("Слово, Слова")
-	scanWord(str)
+	scanWord(str) // сканирование сорва
 	str.englishWord = str.word
 	fmt.Println("str.englishWord: = ", str.englishWord)
-	scanWord(str)
+	scanWord(str) // сканирование слова
 	str.russianWord = str.word
 	fmt.Println("str.russianWord: = ", str.russianWord)
 
@@ -129,7 +122,6 @@ func addWord(str *dbEng) {
 
 	// количество повторных ошибок > 2 = откат на прошлый временной промежуток (day)
 	str.examine = 0
-
 }
 
 // scanWord - чтение слова из консоли
@@ -188,7 +180,7 @@ func checkWord( str *dbEng) {
 	for _, str := range products{
 		fmt.Println(str.id, str.englishWord, str.russianWord, str.timeInit, str.timeCheck,
 			str.examine, str.day, str.mistake)
-		checkTime(&str)
+		checkTime(&str) // готово ли слова для проверки
 	}
 }
 
@@ -210,8 +202,8 @@ func checkTime(str *dbEng) {
 	str.dayTime1 = s.Seconds()
 
 	//Здесь должна быть функция по проверки дня и равному времени для проверки.
-	dayTime(str)
-	timeCheckDay(str)
+	dayTime(str) // временной промежуток в секунды
+	timeCheckDay(str) // готовность слова к проверке
 }
 
 // formatDate - форматирования time.Now() к моему стандарту
@@ -221,7 +213,7 @@ func formatTime(str *dbEng) {
 	str.timeTemporal = timeNow.Format("2006-01-02 15:04:05")
 }
 
-// временной промежуток
+// dayTime - временной промежуток
 // day = 1 - 15 min
 // day = 2 - 2 hours
 // day = 3 - 1 day
@@ -270,23 +262,23 @@ func timeCheckDay(str *dbEng){
 	a := str.dayTime1 - str.dayTime
 	if a > 0 {
 		str.ready = 2 // готово к проверку
-		examineWord(str)
+		examineWord(str) // вывод слова и запроса перевода на него
 	} else {
 		str.ready = 1 // не готово к проверке
 		fmt.Println("Слово не готово для проверки")
 	}
 }
 
-//Функция вывода слова и запроса перевода на него
+//eximineWord - Функция вывода слова и запроса перевода на него
 func examineWord(str *dbEng){
 	fmt.Println("Слово готово к проверке: ", str.englishWord)
-	scanWord(str)
+	scanWord(str) // сканирование слова
 	fmt.Println("Ваш ответ: ", str.word, " Верный ответ: ", str.russianWord)
 	fmt.Println("Если ответы совпадают, введите - 1")
 	fmt.Println("Если ответы не совпадают, введите - 2")
-	scanY(str)
-	examineEnd(str)
-	dateIn(str)
+	scanY(str) // сканирование цифры
+	examineEnd(str) // формирование данных для записи в базу данных
+	dateIn(str) // запись в базу данных
 }
 
 //examineEnd - формирования данных для записи в базу данных
@@ -306,7 +298,7 @@ func examineEnd(str *dbEng){
 		//mistake - +1 после каждой проверки всегда
 		str.mistake++
 
-	} else { // y!=2 ответы не совпали
+	} else { // y!=1 ответы не совпали
 
 		// timeCheck - присвоение даты прохождения теста
 		formatTime(str)
@@ -314,7 +306,7 @@ func examineEnd(str *dbEng){
 
 		//examine - ошибка допущена +1
 		str.examine++
-		examineFail(str)
+		examineFail(str) // обработка количества ошибок
 
 		//mistake - +1 после каждой проверки всегда
 		str.mistake++
