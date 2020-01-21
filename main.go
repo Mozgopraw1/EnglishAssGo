@@ -340,7 +340,9 @@ func dateIn(str *dbEng){
 	defer db.Close()
 
 	// обновление строки по id
-	result, err := db.Exec("update english set day = $1, mistake = $3 where id = $2", 12, str.id, 5)
+	result, err := db.Exec(
+		"update english set time_check = $1, examine = $2, day = $3, mistake = $4 where id = $5",
+		str.timeCheck, str.examine, str.day, str.mistake, str.id)
 	if err != nil { panic (err)}
 	fmt.Println(result.RowsAffected())
 }
