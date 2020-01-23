@@ -57,6 +57,10 @@ func main() {
 	}
 }
 
+func telegramBot(bot *tgbotapi.BotAPI, msg *tgbotapi.MessageConfig, update tgbotapi.Update, str *dbEng) {
+
+}
+
 func variant(bot *tgbotapi.BotAPI, msg *tgbotapi.MessageConfig, update tgbotapi.Update, str *dbEng  ) {
 	if update.Message.Text == "1" {
 		checkWord(bot, msg, update, str) // проверка слова
@@ -172,12 +176,15 @@ func timeCheckDay(bot *tgbotapi.BotAPI, msg *tgbotapi.MessageConfig, update tgbo
 
 func examineWord(bot *tgbotapi.BotAPI, msg *tgbotapi.MessageConfig, update tgbotapi.Update, str *dbEng){
 	msg.Text = "Слово готово к проверке: "+ str.englishWord
+	bot.Send(msg)
 	scanWord(bot, msg, update, str)
-	/*scanWord(str) // сканирование слова
-	fmt.Println("Ваш ответ: ", str.word, " Верный ответ: ", str.russianWord)
-	fmt.Println("Если ответы совпадают, введите - 1")
-	fmt.Println("Если ответы не совпадают, введите - 2")
-	scanY(str) // сканирование цифры
+	msg.Text = "Ваш ответ: " + str.word + "Верный ответ: " +str.russianWord
+	bot.Send(msg)
+	msg.Text = "Если ответы совпадают, введите - 1"
+	bot.Send(msg)
+	msg.Text = "Если ответы не совпадают, введите - 2"
+	bot.Send(msg)
+	msgText(bot, msg, update, str)
 	examineEnd(str) // формирование данных для записи в базу данных
 	dateIn(str) // запись в базу данных */
 }
@@ -197,6 +204,24 @@ func scanWord(bot *tgbotapi.BotAPI, msg *tgbotapi.MessageConfig, update tgbotapi
 
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 		// msg.ReplyToMessageID = update.Message.MessageID
-		bot.Send(msg)
+		str.word = msg.Text
+	}
+}
+
+func msgText(bot *tgbotapi.BotAPI, msg *tgbotapi.MessageConfig, update tgbotapi.Update, str *dbEng) {
+	u := tgbotapi.NewUpdate(0)
+	updates, err := bot.GetUpdatesChan(u)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	for update := range updates {
+		if update.Message == nil { // ignore any non-Message Updates
+			continue
+		}
+		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		// msg.ReplyToMessageID = update.Message.MessageID
 	}
 }

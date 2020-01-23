@@ -229,7 +229,6 @@ func dayTime(str *dbEng) {
 			case str.day > 10:
 				str.dayTime = 157680000
 	}
-
 }
 
 // TimeCheckDay - вывод слова на проверку
