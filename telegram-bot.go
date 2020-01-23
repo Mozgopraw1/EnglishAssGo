@@ -3,10 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/go-telegram-bot-api/telegram-bot-api"
+	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"time"
-
-	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 type dbEng struct{
@@ -24,6 +24,7 @@ type dbEng struct{
 	y int // временная переменая
 	timeTemporal string // временная переменная для времени
 	ready int // переменная готовности
+	x int // переменная на "Проверка слова начата"
 }
 
 var x int // надо снести, чтоб переписать на Y
@@ -63,34 +64,36 @@ func variant(bot *tgbotapi.BotAPI, msg *tgbotapi.MessageConfig, update tgbotapi.
 }
 
 func checkWord(bot *tgbotapi.BotAPI, msg *tgbotapi.MessageConfig, update tgbotapi.Update, str *dbEng) {
-	msg.Text = "Проверка слов начата"
-	bot.Send (msg)
+	for {
+		msg.Text = "Проверка слов начата"
+		bot.Send(msg)
 
-	db, err := sql.Open("sqlite3", "english.sqlite")
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-	rows, err := db.Query("select * from english")
-	if err != nil {
-		panic(err)
-	}
-	defer rows.Close()
-	products := []dbEng{}
-
-	for rows.Next(){
-		err := rows.Scan(&str.id, &str.englishWord, &str.russianWord, &str.timeInit, &str.timeCheck,
-			&str.examine, &str.day, &str.mistake)
-		if err != nil{
-			fmt.Println(err)
-			continue
+		db, err := sql.Open("sqlite3", "english.sqlite")
+		if err != nil {
+			panic(err)
 		}
-		products = append(products, *str)
-	}
-	for _, str := range products{
-		fmt.Println(str.id, str.englishWord, str.russianWord, str.timeInit, str.timeCheck,
-			str.examine, str.day, str.mistake)
-		checkTime(bot, msg, update, &str) // готово ли слова для проверки
+		defer db.Close()
+		rows, err := db.Query("select * from english")
+		if err != nil {
+			panic(err)
+		}
+		defer rows.Close()
+		products := []dbEng{}
+
+		for rows.Next() {
+			err := rows.Scan(&str.id, &str.englishWord, &str.russianWord, &str.timeInit, &str.timeCheck,
+				&str.examine, &str.day, &str.mistake)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			products = append(products, *str)
+		}
+		for _, str := range products {
+			fmt.Println(str.id, str.englishWord, str.russianWord, str.timeInit, str.timeCheck,
+				str.examine, str.day, str.mistake)
+			checkTime(bot, msg, update, &str) // готово ли слова для проверки
+		}
 	}
 }
 
@@ -162,7 +165,8 @@ func timeCheckDay(bot *tgbotapi.BotAPI, msg *tgbotapi.MessageConfig, update tgbo
 		examineWord(bot, msg, update, str) // вывод слова и запроса перевода на него
 	} else {
 		str.ready = 1 // не готово к проверке
-		fmt.Println("Слово не готово для проверки")
+		msg.Text = ("Слово не готово для проверки")
+		bot.Send(msg)
 	}
 }
 

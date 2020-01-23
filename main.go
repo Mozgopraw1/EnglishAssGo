@@ -26,13 +26,11 @@ type dbEng struct{
 	ready int // переменная готовности
 }
 
-var x int // надо снести, чтоб переписать на Y
-
 func main() {
 		str := new(dbEng) // str - структура данных всей программы
 		welcomeP()      // приветствие и инструкция
-		scanX(&x)       // выбор варианта продолжения программы
-		variant(x, str) // запуск одного из вариантов
+		scanY(str)     // выбор варианта продолжения программы
+		variant(str) // запуск одного из вариантов
 }
 
 //welcomeP - приветствие
@@ -41,20 +39,6 @@ func welcomeP() {
 	fmt.Println("1 - проверка слов")
 	fmt.Println("2 - добавление слова")
 	fmt.Println("3 - выход из программы")
-}
-
-// надо переписать эту функция с Y
-//scanX - выбранные вариант продолжения программы.
-func scanX(x *int) {
-	var a string
-	_, err := fmt.Scan(&a)
-	*x, err = strconv.Atoi(a)
-	if err != nil {
-		fmt.Println(err)
-	}
-	if err != nil {
-		fmt.Println(err)
-	}
 }
 
 // scanY - считывает цифру из консоли.
@@ -71,15 +55,15 @@ func scanY(str *dbEng) {
 }
 
 // variant - запуск одного из вариантов
-func variant(x int, str *dbEng){
-	if x == 1 {
+func variant(str *dbEng){
+	if str.y == 1 {
 		checkWord(str) // проверка слова
 	}
-	if x == 2 {
+	if str.y == 2 {
 		addWord(str) // формирование слова для таблицы
 		addWordDB(*str) // добавление слова в таблица
 	}
-	if x == 3 {
+	if str.y == 3 {
 		os.Exit(0) // закрытие программы
 	}
 }
@@ -223,36 +207,29 @@ func formatTime(str *dbEng) {
 // day = 9 - 365 day
 func dayTime(str *dbEng) {
 	//15m0s
-	if str.day == 1{
-		str.dayTime = 900 // 15min
+	switch {
+			case str.day == 1:
+				str.dayTime = 900 // 15min
+			case str.day == 2:
+				str.dayTime = 7200 // 2h
+			case str.day == 3:
+				str.dayTime = 86400 // 1d
+			case str.day == 4:
+				str.dayTime = 259200 // 3d
+			case str.day == 5:
+				str.dayTime = 604800 // 7d
+			case str.day == 6:
+				str.dayTime = 1814400 // 21d
+			case str.day == 7:
+				str.dayTime = 4320000 // 50d
+			case str.day == 8:
+				str.dayTime = 12960000 // 150d
+			case str.day == 9:
+				str.dayTime = 31536000 // 365d
+			case str.day > 10:
+				str.dayTime = 157680000
 	}
-	if str.day == 2{
-		str.dayTime = 7200 // 2h
-	}
-	if str.day == 3 {
-		str.dayTime = 86400 // 1d
-	}
-	if str.day == 4 {
-		str.dayTime = 259200 // 3d
-	}
-	if str.day == 5 {
-		str.dayTime = 604800 // 7d
-	}
-	if str.day == 6 {
-		str.dayTime = 1814400 // 21d
-	}
-	if str.day == 7 {
-		str.dayTime = 4320000 // 50d
-	}
-	if str.day == 8 {
-		str.dayTime = 12960000 // 150d
-	}
-	if str.day == 9 {
-		str.dayTime = 31536000 // 365d
-	}
-	if str.day > 10 {
-		str.dayTime = 157680000
-	}
+
 }
 
 // TimeCheckDay - вывод слова на проверку
